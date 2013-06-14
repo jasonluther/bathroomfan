@@ -45,9 +45,11 @@ void loop(void) {
   if (millis() > (STARTED_TIME + MAX_DURATION)) {
     Serial.println("Fan exceeded MAX_DURATION");
     FAN_ON = false;
+    DURATION = 0;
   } else if (millis() > (STARTED_TIME + DURATION)) {
     Serial.println("Fan exceeded DURATION");
     FAN_ON = false;
+    DURATION = 0;
   }
   
   // Should the fan be on? Check the humidity and set DURATION.
