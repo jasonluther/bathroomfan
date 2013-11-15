@@ -3,6 +3,7 @@
 
 const int humiditySensorPin = 4;
 const int relayPin = 8;
+const int ledPin = 13;
 
 DHT22 sensor(humiditySensorPin);
 
@@ -25,9 +26,12 @@ void setup(void) {
   Serial.println(MAX_DURATION);   
   Serial.print("DURATION: ");
   Serial.println(DURATION); 
+  pinMode(ledPin, OUTPUT); // the built-in Arduion LED on pin 13
 }
 
 void loop(void) {
+  DHT22_ERROR_t errorCode;
+  
   // If the fan state is on, make sure it's on
   if (FAN_ON) {
     Serial.println("Fan is on.");
@@ -53,8 +57,54 @@ void loop(void) {
   }
   
   // Should the fan be on? Check the humidity and set DURATION.
-  sensor.readData();
+  Serial.print("Requesting data...");
+  errorCode = sensor.readData();
+  switch(errorCode)
+  {
+    case DHT_ERROR_NONE:
+      Serial.print("Got Data ");
+      Serial.print(sensor.getTemperatureF());
+      Serial.print("F ");
+      Serial.print(sensor.getHumidity());
+      Serial.println("%");
+      // Alternately, with integer formatting which is clumsier but more compact to store and
+	  // can be compared reliably for equality:
+	  //	  
+      char buf[128];
+      sprintf(buf, "Integer-only reading: Temperature %hi.%01hi C, Humidity %i.%01i %% RH",
+                   sensor.getTemperatureCInt()/10, abs(sensor.getTemperatureCInt()%10),
+                   sensor.getHumidityInt()/10, sensor.getHumidityInt()%10);
+      Serial.println(buf);
+      break;
+    case DHT_ERROR_CHECKSUM:
+      Serial.print("check sum error ");
+      Serial.print(sensor.getTemperatureC());
+      Serial.print("C ");
+      Serial.print(sensor.getHumidity());
+      Serial.println("%");
+      break;
+    case DHT_BUS_HUNG:
+      Serial.println("Bus Hung ");
+      break;
+    case DHT_ERROR_NOT_PRESENT:
+      Serial.println("Not Present ");
+      break;
+    case DHT_ERROR_ACK_TOO_LONG:
+      Serial.println("ACK time out ");
+      break;
+    case DHT_ERROR_SYNC_TIMEOUT:
+      Serial.println("Sync Timeout ");
+      break;
+    case DHT_ERROR_DATA_TIMEOUT:
+      Serial.println("Data Timeout ");
+      break;
+    case DHT_ERROR_TOOQUICK:
+      Serial.println("Must wait 2s before reading data again ");
+      break;
+  }
+  
   float relative_humidity = sensor.getHumidity();
+  blink(relative_humidity / 10);
   Serial.print("Humidity: ");
   Serial.print(relative_humidity);
   Serial.println("%");
@@ -66,5 +116,21 @@ void loop(void) {
     FAN_ON = true;
   }
   
-  delay(5000);
+  delay(3000);
+}
+
+void blink(int times) {
+  int count = 10;
+  while (count-- > 0) {
+    if (times > 0) {
+      digitalWrite(ledPin, HIGH);
+      delay(100);
+      digitalWrite(ledPin, LOW);
+      delay(100);
+      times--;
+    } else {
+      digitalWrite(ledPin, LOW);
+      delay(200);
+    }
+  }
 }
