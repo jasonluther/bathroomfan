@@ -23,25 +23,25 @@ void setup(void) {
   DURATION = 1000L * 60L * 15L;
   delay(2001); // Give the sensor 2 seconds to warm up.
   Serial.print("MAX_DURATION: ");
-  Serial.println(MAX_DURATION);   
+  Serial.println(MAX_DURATION);
   Serial.print("DURATION: ");
-  Serial.println(DURATION); 
+  Serial.println(DURATION);
   pinMode(ledPin, OUTPUT); // the built-in Arduion LED on pin 13
 }
 
 void loop(void) {
   DHT22_ERROR_t errorCode;
-  
+
   // If the fan state is on, make sure it's on
   if (FAN_ON) {
     Serial.println("Fan is on.");
-    digitalWrite(relayPin, HIGH); 
+    digitalWrite(relayPin, HIGH);
     if (STARTED_TIME == 0) {
       STARTED_TIME = millis();
     }
   } else {
     Serial.println("Fan is off.");
-    digitalWrite(relayPin, LOW); 
+    digitalWrite(relayPin, LOW);
     STARTED_TIME = 0;
   }
 
@@ -55,7 +55,7 @@ void loop(void) {
     FAN_ON = false;
     DURATION = 0;
   }
-  
+
   // Should the fan be on? Check the humidity and set DURATION.
   Serial.print("Requesting data...");
   errorCode = sensor.readData();
@@ -69,7 +69,7 @@ void loop(void) {
       Serial.println("%");
       // Alternately, with integer formatting which is clumsier but more compact to store and
 	  // can be compared reliably for equality:
-	  //	  
+	  //
       char buf[128];
       sprintf(buf, "Integer-only reading: Temperature %hi.%01hi C, Humidity %i.%01i %% RH",
                    sensor.getTemperatureCInt()/10, abs(sensor.getTemperatureCInt()%10),
@@ -102,7 +102,7 @@ void loop(void) {
       Serial.println("Must wait 2s before reading data again ");
       break;
   }
-  
+
   float relative_humidity = sensor.getHumidity();
   blink(relative_humidity / 10);
   Serial.print("Humidity: ");
@@ -115,7 +115,7 @@ void loop(void) {
     DURATION = 1000L * 60L * 20L; // Stay on for 20 minutes as long as it's a bit humid.
     FAN_ON = true;
   }
-  
+
   delay(3000);
 }
 
