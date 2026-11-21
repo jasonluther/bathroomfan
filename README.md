@@ -4,7 +4,7 @@ Using an Arduino and RHT03 Humidity Sensor, turn on a bathroom fan when necessar
 
 ![Fan in action](docs/06%20Installed.jpg)
 
-Requires DHT22 library by Ben Adams: https://github.com/jasonluther/Arduino-DHT22
+Requires DHT22 library by Ben Adams: <https://github.com/jasonluther/Arduino-DHT22>
 
 Parts:
 
